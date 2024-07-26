@@ -1,0 +1,12 @@
+# ignore json and csv files
+*.json
+*.csv
+
+# ignore pycache
+__pycache__/
+
+# ignore virtualenv
+venv/
+
+# ignore .db files
+*.db
