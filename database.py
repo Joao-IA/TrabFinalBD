@@ -6,6 +6,7 @@ class Database:
         self.cursor = self.conn.cursor()
     
     def criar_tabelas(self):
+        # Tabelas originais
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Clientes (
             ClienteID INTEGER PRIMARY KEY,
@@ -68,32 +69,80 @@ class Database:
         )
         ''')
 
+        # Tabelas de dimensões
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS DimensaoCliente (
+            ClienteID INTEGER PRIMARY KEY,
+            Nome TEXT NOT NULL,
+            Regiao TEXT,
+            Segmento TEXT
+        )
+        ''')
+
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS DimensaoProduto (
+            ProdutoID INTEGER PRIMARY KEY,
+            NomeProduto TEXT NOT NULL,
+            Categoria TEXT,
+            Peso REAL
+        )
+        ''')
+
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS DimensaoTempo (
+            DataID INTEGER PRIMARY KEY,
+            Data TEXT NOT NULL,
+            Semana INTEGER,
+            Mes INTEGER,
+            Ano INTEGER
+        )
+        ''')
+
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS DimensaoVeiculo (
+            VeiculoID INTEGER PRIMARY KEY,
+            TipoVeiculo TEXT NOT NULL,
+            Capacidade REAL
+        )
+        ''')
+
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS DimensaoMotorista (
+            MotoristaID INTEGER PRIMARY KEY,
+            Nome TEXT NOT NULL,
+            CNH TEXT NOT NULL
+        )
+        ''')
+
+        # Tabela de fatos
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS FatosEntregas (
+            EntregaID INTEGER PRIMARY KEY,
+            DataHoraInicio TEXT,
+            DataHoraFim TEXT,
+            TempoEntrega REAL,
+            ClienteID INTEGER,
+            ProdutoID INTEGER,
+            VeiculoID INTEGER,
+            MotoristaID INTEGER,
+            Quantidade INTEGER,
+            FOREIGN KEY (ClienteID) REFERENCES DimensaoCliente (ClienteID),
+            FOREIGN KEY (ProdutoID) REFERENCES DimensaoProduto (ProdutoID),
+            FOREIGN KEY (VeiculoID) REFERENCES DimensaoVeiculo (VeiculoID),
+            FOREIGN KEY (MotoristaID) REFERENCES DimensaoMotorista (MotoristaID)
+        )
+        ''')
+
         self.conn.commit()
 
     def select(self, query):
         self.cursor.execute(query)
         return self.cursor.fetchall()
 
-    def inserir(self, query):
-        self.cursor.execute(query)
+    def inserir(self, query, params=None):
+        if params:
+            self.cursor.execute(query, params)
+        else:
+            self.cursor.execute(query)
         self.conn.commit()
         return self.cursor.lastrowid
-
-# Teste
-db = Database()
-db.criar_tabelas()
-
-# Inserir dados
-db.inserir('INSERT INTO Clientes (Nome, EnderecoEntrega, Telefone, Email) VALUES ("João", "Rua 1", "123456", "joao@email.com")')
-db.inserir('INSERT INTO Produtos (NomeProduto, Descricao, Peso, Dimensoes) VALUES ("Produto 1", "Descrição do produto 1", 1.5, "10x10x10")')
-db.inserir('INSERT INTO Pedidos (ClienteID, DataPedido, Status) VALUES (1, "2021-10-01", "Pendente")')
-db.inserir('INSERT INTO Entregas (PedidoID, VeiculoID, DataHoraInicio, DataHoraFim, StatusEntrega) VALUES (1, 1, "2021-10-01 10:00", "2021-10-01 11:00", "Entregue")')
-db.inserir('INSERT INTO Veiculos (TipoVeiculo, Capacidade, LocalizacaoAtual) VALUES ("Caminhão", 1000, "Rua 2")')
-db.inserir('INSERT INTO Motoristas (Nome, CNH, VeiculoID) VALUES ("José", "123", 1)')
-
-print(db.select('SELECT * FROM Clientes'))
-print(db.select('SELECT * FROM Produtos'))
-print(db.select('SELECT * FROM Pedidos'))
-print(db.select('SELECT * FROM Entregas'))
-print(db.select('SELECT * FROM Veiculos'))
-print(db.select('SELECT * FROM Motoristas'))
