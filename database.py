@@ -2,7 +2,7 @@ import sqlite3
 
 class Database:
     def __init__(self):
-        self.conn = sqlite3.connect('rastreamento_entregas.db')
+        self.conn = sqlite3.connect('rastreamento_entregas.db', check_same_thread=False)
         self.cursor = self.conn.cursor()
     
     def criar_tabelas(self):
