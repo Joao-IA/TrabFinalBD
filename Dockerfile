@@ -1,6 +1,16 @@
 # Use a imagem oficial do Python como base
 FROM python:3.10-slim
 
+# Instale as dependências do sistema
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gfortran \
+    libatlas-base-dev \
+    liblapack-dev \
+    libblas-dev \
+    libgomp1 \
+    && apt-get clean
+
 # Defina o diretório de trabalho no container
 WORKDIR /app
 

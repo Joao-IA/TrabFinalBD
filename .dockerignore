@@ -1,0 +1,28 @@
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore arquivos e diretórios de ambiente virtual
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Ignore arquivos de configuração do sistema operacional
+.DS_Store
+
+# Ignore arquivos de log e temporários
+*.log
+*.tmp
+
+# Ignore arquivos específicos do IDE
+.vscode/
+.idea/
+*.swp
+
+# Ignore outros arquivos desnecessários
+.git/
+.gitignore

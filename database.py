@@ -7,37 +7,35 @@ class Database:
     
     def criar_tabelas(self):
         # Tabelas originais
-        self.cursor.execute('''
+        self.cursor.executescript('''
         CREATE TABLE IF NOT EXISTS Clientes (
-            ClienteID INTEGER PRIMARY KEY,
+            ClienteID TEXT PRIMARY KEY,
             Nome TEXT NOT NULL,
             EnderecoEntrega TEXT NOT NULL,
             Telefone TEXT,
-            Email TEXT
-        )
-        ''')
+            Email TEXT,
+            Genero TEXT
+        );
 
-        self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Produtos (
             ProdutoID INTEGER PRIMARY KEY,
             NomeProduto TEXT NOT NULL,
             Descricao TEXT,
             Peso REAL,
-            Dimensoes TEXT
-        )
-        ''')
+            Valor REAL,
+            Categoria TEXT
+        );
 
-        self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Pedidos (
             PedidoID INTEGER PRIMARY KEY,
-            ClienteID INTEGER,
+            ClienteID TEXT,
+            ProdutoID INTEGER,
             DataPedido TEXT NOT NULL,
             Status TEXT,
-            FOREIGN KEY (ClienteID) REFERENCES Clientes (ClienteID)
-        )
-        ''')
+            FOREIGN KEY (ClienteID) REFERENCES Clientes (ClienteID),
+            FOREIGN KEY (ProdutoID) REFERENCES Produtos (ProdutoID)
+        );
 
-        self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Entregas (
             EntregaID INTEGER PRIMARY KEY,
             PedidoID INTEGER,
@@ -47,92 +45,34 @@ class Database:
             StatusEntrega TEXT,
             FOREIGN KEY (PedidoID) REFERENCES Pedidos (PedidoID),
             FOREIGN KEY (VeiculoID) REFERENCES Veiculos (VeiculoID)
-        )
-        ''')
+        );
 
-        self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Veiculos (
             VeiculoID INTEGER PRIMARY KEY,
             TipoVeiculo TEXT NOT NULL,
             Capacidade REAL,
             LocalizacaoAtual TEXT
-        )
-        ''')
+        );
 
-        self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Motoristas (
             MotoristaID INTEGER PRIMARY KEY,
             Nome TEXT NOT NULL,
             CNH TEXT NOT NULL,
             VeiculoID INTEGER,
             FOREIGN KEY (VeiculoID) REFERENCES Veiculos (VeiculoID)
-        )
+        );
         ''')
+        self.conn.commit()
 
-        # Tabelas de dimensões
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS DimensaoCliente (
-            ClienteID INTEGER PRIMARY KEY,
-            Nome TEXT NOT NULL,
-            Regiao TEXT,
-            Segmento TEXT
-        )
+    def drop_tabelas(self):
+        self.cursor.executescript('''
+        DROP TABLE IF EXISTS Clientes;
+        DROP TABLE IF EXISTS Produtos;
+        DROP TABLE IF EXISTS Pedidos;
+        DROP TABLE IF EXISTS Entregas;
+        DROP TABLE IF EXISTS Veiculos;
+        DROP TABLE IF EXISTS Motoristas;
         ''')
-
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS DimensaoProduto (
-            ProdutoID INTEGER PRIMARY KEY,
-            NomeProduto TEXT NOT NULL,
-            Categoria TEXT,
-            Peso REAL
-        )
-        ''')
-
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS DimensaoTempo (
-            DataID INTEGER PRIMARY KEY,
-            Data TEXT NOT NULL,
-            Semana INTEGER,
-            Mes INTEGER,
-            Ano INTEGER
-        )
-        ''')
-
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS DimensaoVeiculo (
-            VeiculoID INTEGER PRIMARY KEY,
-            TipoVeiculo TEXT NOT NULL,
-            Capacidade REAL
-        )
-        ''')
-
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS DimensaoMotorista (
-            MotoristaID INTEGER PRIMARY KEY,
-            Nome TEXT NOT NULL,
-            CNH TEXT NOT NULL
-        )
-        ''')
-
-        # Tabela de fatos
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS FatosEntregas (
-            EntregaID INTEGER PRIMARY KEY,
-            DataHoraInicio TEXT,
-            DataHoraFim TEXT,
-            TempoEntrega REAL,
-            ClienteID INTEGER,
-            ProdutoID INTEGER,
-            VeiculoID INTEGER,
-            MotoristaID INTEGER,
-            Quantidade INTEGER,
-            FOREIGN KEY (ClienteID) REFERENCES DimensaoCliente (ClienteID),
-            FOREIGN KEY (ProdutoID) REFERENCES DimensaoProduto (ProdutoID),
-            FOREIGN KEY (VeiculoID) REFERENCES DimensaoVeiculo (VeiculoID),
-            FOREIGN KEY (MotoristaID) REFERENCES DimensaoMotorista (MotoristaID)
-        )
-        ''')
-
         self.conn.commit()
 
     def select(self, query):
