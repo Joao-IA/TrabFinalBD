@@ -6,7 +6,7 @@ class Database:
         self.cursor = self.conn.cursor()
     
     def criar_tabelas(self):
-        # Tabelas originais
+        # Tabelas atualizadas
         self.cursor.executescript('''
         CREATE TABLE IF NOT EXISTS Clientes (
             ClienteID TEXT PRIMARY KEY,
@@ -39,16 +39,21 @@ class Database:
         CREATE TABLE IF NOT EXISTS Entregas (
             EntregaID INTEGER PRIMARY KEY,
             PedidoID INTEGER,
-            VeiculoID INTEGER,
+            ProdutoID INTEGER,
+            MotoristaID INTEGER,                        
+            VeiculoID TEXT,
             DataHoraInicio TEXT,
             DataHoraFim TEXT,
             StatusEntrega TEXT,
+            Latitude REAL,
+            Longitude REAL,
+            Estado TEXT,
             FOREIGN KEY (PedidoID) REFERENCES Pedidos (PedidoID),
             FOREIGN KEY (VeiculoID) REFERENCES Veiculos (VeiculoID)
         );
 
         CREATE TABLE IF NOT EXISTS Veiculos (
-            VeiculoID INTEGER PRIMARY KEY,
+            VeiculoID TEXT PRIMARY KEY,
             TipoVeiculo TEXT NOT NULL,
             Capacidade REAL,
             LocalizacaoAtual TEXT

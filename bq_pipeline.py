@@ -5,6 +5,9 @@ from google.oauth2 import service_account
 from google.cloud import bigquery
 from pandas_gbq import to_gbq
 import json
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 class BigQueryData:
     def __init__(self, credentials_path="credentials.json"):
@@ -39,14 +42,33 @@ class BigQueryData:
 
         # Iterar sobre as tabelas e carregar dados no BigQuery
         for table, sql_file in tables_sql_files.items():
-            with open(os.path.join(sql_folder, sql_file), 'r') as file:
+            sql_file_path = os.path.join(sql_folder, sql_file)
+            if not os.path.exists(sql_file_path):
+                logging.error(f"Arquivo SQL não encontrado: {sql_file_path}")
+                continue
+
+            with open(sql_file_path, 'r') as file:
                 query = file.read()
 
             # Executar a consulta no SQLite
             df = pd.read_sql_query(query, conn)
 
+            # Printar informações sobre o DataFrame
+            logging.debug(f'\n{table}:')
+            logging.debug(df.info())
+            logging.debug("\n" + df.head().to_string())
+
             # Enviar os dados para o BigQuery
-            self._save_dataframe_to_bq(df, f'seu_dataset.{table}', if_exists='replace')
+            try:
+                self._save_dataframe_to_bq(df, f'seu_dataset.{table}', if_exists='append')
+                logging.info(f"Dados da tabela {table} enviados com sucesso para o BigQuery.")
+            except Exception as e:
+                logging.error(f"Erro ao enviar dados para o BigQuery: {e}")
 
         # Fechar a conexão com o SQLite
         conn.close()
+
+# Exemplo de uso
+if __name__ == "__main__":
+    bq_data = BigQueryData(credentials_path="credentials.json")
+    bq_data.transfer_data_to_bq(sqlite_db_path='rastreamento_entregas.db', sql_folder='sql')

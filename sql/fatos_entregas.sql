@@ -1,11 +1,17 @@
 SELECT 
+    (julianday(e.DataHoraInicio) - 2440587.5) AS DataID,
     e.EntregaID, 
+    e.Estado,
+    e.Latitude,
+    e.Longitude,
+    e.StatusEntrega,
     e.DataHoraInicio, 
     e.DataHoraFim, 
+    e.PedidoID,
+    d.ProdutoID,
     (julianday(e.DataHoraFim) - julianday(e.DataHoraInicio)) * 24 AS TempoEntrega,
     c.ClienteID, 
-    p.ProdutoID, 
-    v.VeiculoID, 
+    v.VeiculoID,
     m.MotoristaID
 FROM 
     Entregas e
@@ -14,8 +20,8 @@ JOIN
 JOIN 
     Clientes c ON d.ClienteID = c.ClienteID
 JOIN 
-    Produtos p ON d.ProdutoID = p.ProdutoID
-JOIN 
     Veiculos v ON e.VeiculoID = v.VeiculoID
 JOIN 
-    Motoristas m ON v.VeiculoID = m.VeiculoID;
+    Motoristas m ON e.MotoristaID = m.MotoristaID
+JOIN
+    Produtos p ON e.ProdutoID = p.ProdutoID
